@@ -1,58 +1,32 @@
-import * as React from 'react';
-import { connect } from 'react-redux';
-import './css.scss';
+import React, { useState } from 'react';
+import './index.scss';
+import TodoItem from '../TodoItem';
+import todoStore from '../../store/TodoStore';
+import { observer } from 'mobx-react';
 
-import { addTodo, changeInput, finishTodo, deleteTodo } from '../../actions/todoAction';
-import Todo from '../Todo';
-
-const mapStateToProps = (state: any) => ({
-    todos: [...state.todoReducer.todos],
-    input: state.todoReducer.input,
-})
-const mapDispatchToProps = (dispatch: any) => ({
-    onClick: (input: any) => {
-        dispatch(addTodo({
-            title: input.title,
-            done: false,
-        }))
-    },
-    onDelete: (index: number) => {
-        dispatch(deleteTodo(index));
-    },
-    onInput: (value: string) => {
-        dispatch(changeInput(value));
-    },
-    onFinish: (index: number) => {
-        dispatch(finishTodo(index));
-    }
-});
-
-interface props {
-    onClick: (input: any) => void;
-    onInput: (value: string) => void;
-    onDelete: (index: number) => void;
-    onFinish: (index: number) => void;
-    todos: any;
-    input: any;
-}
-
-const TodoList = ({ onClick, onInput, onDelete, onFinish, todos, input }: props) => {
+const TodoList = () => {
+    const [text, setText] = useState<string>('');
     return (
         <div className='todoList'>
             <div className='input'>
-                <input type="text" placeholder='請輸入代辦事項' value={input.title} onChange={(e: any) => onInput(e.target.value)} />
-                <button onClick={() => onClick(input)}>Add Todo</button>
+                <input type="text" 
+                    placeholder='Please Input the todo Item' 
+                    value={text} 
+                    onChange={(e: any) => setText(e.target.value)}
+                />
+                <button onClick={() => todoStore.add(text)}>Add Todo</button>
             </div>
             {
-                todos.map((todo: any) =>
-                    <Todo key={todo.no} onDelete={onDelete} onFinish={onFinish}  {...todo} />
+                todoStore.todos.map((todo: any) =>
+                    <TodoItem key={todo.no} {...todo} />
                 )
             }
+            <div className="text">
+                <span>Total: {todoStore.total}</span>
+                <span>Completed: {todoStore.completed}</span>
+            </div>
         </div>
     )
 }
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(TodoList);
+export default observer(TodoList);
